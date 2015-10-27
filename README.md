@@ -1,2 +1,2 @@
 # LWF
-Lightweight Frontend
+Boilerplate code for developing a lightweight frontend.

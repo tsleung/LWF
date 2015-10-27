@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prototype Boilerplate</title>
+  <style type="text/less">
+    body{
+      font-size:16px;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.15/require.js"></script>
+</head>
+<body>
+<script
+    type="application-text/component-template"
+    data-name="components/Prototype"
+    >
+  <h2>Prototype</h2>
+</script>
+<div data-name="components/Prototype" class="component Prototype">
+
+</div>
+<script type="text/javascript">
+    require.config({
+    shim : {
+        'jquery.serializeJSON' : {
+    	      deps : ['jquery'],
+            exports : 'jQuery.fn.serializeJSON'
+        },
+        underscore : {
+    	      deps : ['jquery'],
+            exports : '_'
+        },
+        backbone : {
+            deps : ['underscore'],
+            exports : 'Backbone'
+        },
+        marionette : {
+            deps : ['backbone'],
+            exports : 'Marionette'
+        }
+    },
+    map: {
+        '*' : {
+            'TemplateRegistry' : 'DomTemplateRegistry'
+        }
+    },
+    paths: {
+        'jquery.serializeJSON':'https://cdnjs.cloudflare.com/ajax/libs/jquery.serializeJSON/2.6.1/jquery.serializejson',
+        'jquery' : 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery',
+        'underscore' : 'https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore',
+        'backbone' : 'https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.3/backbone',
+        'marionette' : 'https://cdnjs.cloudflare.com/ajax/libs/backbone.marionette/2.4.3/backbone.marionette'
+    }
+  });
+</script>
+<script>
+define('DomTemplateRegistry',[],function(){
+    var registry = {};
+    return function(){
+        this.addTemplate = function(name,template){
+            registry[name] = template;
+        }
+        this.getTemplate = function(name){
+            return registry[name];
+        }
+    };
+});
+define('components/Component',['marionette'],function(Marionette){
+    return Marionette.ItemView.extend();
+});
+</script>
+<script>
+  define('components/Prototype',[
+        './Component',
+        'jquery.serializeJSON'
+    ],function(Super,formSerializer){
+    return Super.extend({
+
+    });
+});
+</script>
+<script type="text/javascript">
+    require(
+        [
+          'jquery',
+          'underscore',
+          'backbone',
+          'TemplateRegistry'
+        ],
+        function(
+          $,
+          _,
+          Backbone,
+          TemplateRegistry
+        ){
+        // application bootstrapping
+        var templateRegistry = new TemplateRegistry();
+        $(window.document.body)
+            .find('script[type="application-text/component-template"]')
+            .each(function(){
+                var script = $(this);
+                templateRegistry.addTemplate(script.data('name'),_.template(script.html()))
+            });
+
+        // init components
+        $(window.document.body)
+            .find('.component')
+            .each(function(){
+                var $el = $(this);
+                var componentName = $el.data('name');
+                require([componentName],function(Component){
+                    var component = new Component({
+                        el : $el,
+                        template : templateRegistry.getTemplate(componentName) || function(){}
+                    });
+                    component.render();
+                });
+            });
+    });
+</script>
+</body>
+</html>
